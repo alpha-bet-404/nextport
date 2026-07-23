@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2026 Steven Osama (zeroman). All rights reserved.
+# Lead Developer: Steven Osama | GitHub: @stevenosama025-sudo
+
+NEXPORT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEXPORT_INSTALL_PATH="/usr/local/bin/nexport"
+NEXPORT_INSTALL_DIR="/usr/local/lib/nexport"
+
+source "$NEXPORT_DIR/lib/colors.sh"
+source "$NEXPORT_DIR/lib/ui.sh"
+source "$NEXPORT_DIR/data/ports_db.sh"
+source "$NEXPORT_DIR/data/ports_db_ext1.sh"
+source "$NEXPORT_DIR/data/ports_db_ext2.sh"
+source "$NEXPORT_DIR/data/ports_db_ext3.sh"
+source "$NEXPORT_DIR/modules/lookup.sh"
+source "$NEXPORT_DIR/modules/search.sh"
+source "$NEXPORT_DIR/modules/category.sh"
+source "$NEXPORT_DIR/modules/top_ports.sh"
+source "$NEXPORT_DIR/modules/quiz.sh"
+source "$NEXPORT_DIR/modules/nmap_scan.sh"
+source "$NEXPORT_DIR/modules/summarizer.sh"
+source "$NEXPORT_DIR/modules/export.sh"
+source "$NEXPORT_DIR/modules/api_intel.sh"
+source "$NEXPORT_DIR/modules/ai_intel.sh"
+
+_nexport_install() {
+  if [[ $EUID -ne 0 ]]; then
+    echo -e "\n  ${YELLOW}${WARN} Run with sudo to install system-wide:${RESET}"
+    echo -e "  ${GREEN}sudo $0 --install${RESET}\n"
+    return 1
+  fi
+
+  echo -e "\n  ${CYAN}Installing NEXPORT to system...${RESET}"
+
+  if [[ -d "$NEXPORT_INSTALL_DIR" ]]; then
+    rm -rf "$NEXPORT_INSTALL_DIR"
+  fi
+
+  mkdir -p "$NEXPORT_INSTALL_DIR"
+  cp -r "$NEXPORT_DIR/lib"     "$NEXPORT_INSTALL_DIR/"
+  cp -r "$NEXPORT_DIR/data"    "$NEXPORT_INSTALL_DIR/"
+  cp -r "$NEXPORT_DIR/modules" "$NEXPORT_INSTALL_DIR/"
+
+  cat > "$NEXPORT_INSTALL_PATH" << WRAPPER
+#!/usr/bin/env bash
+NEXPORT_DIR="$NEXPORT_INSTALL_DIR"
+source "\$NEXPORT_DIR/lib/colors.sh"
+source "\$NEXPORT_DIR/lib/ui.sh"
+source "\$NEXPORT_DIR/data/ports_db.sh"
+source "\$NEXPORT_DIR/data/ports_db_ext1.sh"
+source "\$NEXPORT_DIR/data/ports_db_ext2.sh"
+source "\$NEXPORT_DIR/data/ports_db_ext3.sh"
+source "\$NEXPORT_DIR/modules/lookup.sh"
+source "\$NEXPORT_DIR/modules/search.sh"
+source "\$NEXPORT_DIR/modules/category.sh"
+source "\$NEXPORT_DIR/modules/top_ports.sh"
+source "\$NEXPORT_DIR/modules/quiz.sh"
+source "\$NEXPORT_DIR/modules/nmap_scan.sh"
+source "\$NEXPORT_DIR/modules/summarizer.sh"
+source "\$NEXPORT_DIR/modules/export.sh"
+source "\$NEXPORT_DIR/modules/api_intel.sh"
+source "\$NEXPORT_DIR/modules/ai_intel.sh"
+source "$NEXPORT_INSTALL_DIR/nexport_main.sh" "\$@"
+WRAPPER
+
+  cp "$NEXPORT_DIR/nexport" "$NEXPORT_INSTALL_DIR/nexport_main.sh"
+  chmod +x "$NEXPORT_INSTALL_PATH"
+  chmod -R 755 "$NEXPORT_INSTALL_DIR"
+
+  echo -e "  ${GREEN}${OK} Installed: ${WHITE}${NEXPORT_INSTALL_PATH}${RESET}"
+  echo -e "  ${GREEN}${OK} Library:   ${WHITE}${NEXPORT_INSTALL_DIR}${RESET}"
+  echo -e "  ${CYAN}Run ${WHITE}nexport${CYAN} from anywhere.${RESET}\n"
+}
+
+_nexport_uninstall() {
+  if [[ $EUID -ne 0 ]]; then
+    echo -e "\n  ${YELLOW}Run with sudo to uninstall: ${GREEN}sudo nexport --uninstall${RESET}\n"
+    return 1
+  fi
+  rm -f "$NEXPORT_INSTALL_PATH"
+  rm -rf "$NEXPORT_INSTALL_DIR"
+  echo -e "\n  ${GREEN}${OK} NexPort uninstalled.${RESET}\n"
+}
+
+show_help() {
+  clear
+  echo -e "\n  ${BOLD}${CYAN}╔══ NEXPORT — Command Reference ════════════════════════════════════════╗${RESET}"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}LOOKUP${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-h <port|name>${RESET}       Deep info on a port    ${DIM}(-h 22, -h ssh, -h 443)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-a, --all${RESET}            List all ports by category"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-t, --top${RESET}            Top 30 most targeted ports"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}SEARCH & FILTER${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-s <keyword>${RESET}         Search name, protocol, description, CVE"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-c <category>${RESET}        Filter by category           ${DIM}(-c database)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-p <proto>${RESET}           Filter by protocol            ${DIM}(tcp|udp|both)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-e <enc>${RESET}             Filter by encryption          ${DIM}(yes|no|partial)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-r <level>${RESET}           Filter by risk level          ${DIM}(critical|high|medium|low)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}--cve <CVE-ID>${RESET}       Find ports linked to a CVE    ${DIM}(--cve CVE-2020-1938)${RESET}"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}SCAN & ANALYZE${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}scan <target>${RESET}        Live nmap scan + intelligence summary"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}paste${RESET}                Paste existing nmap output for analysis"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}summarize${RESET}            Alias for paste mode"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}LIVE THREAT INTEL${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel set-key <key>${RESET}  Save your Shodan API key"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel clear-key${RESET}      Remove saved Shodan API key"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel <ip>${RESET}           On-demand Shodan + CVE lookup for a public IP"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel help${RESET}           Show full intel command reference"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}  └─ Shodan data also auto-appended after every ${GREEN}scan${GRAY} run${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}  └─ CVE lookup via CIRCL (cve.circl.lu) runs automatically${RESET}"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}AI INTELLIGENCE LAYER${RESET}  ${PURPLE}★${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel set-ai-key <key>${RESET}  Interactive setup: provider + model + endpoint"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel clear-ai-key${RESET}      Remove AI config (revert to standard mode)"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}intel ai-help${RESET}           Show AI layer reference + current config"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}  └─ Providers: OpenAI · Google Gemini · Anthropic · Custom (Ollama, Groq …)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}  └─ Model-agnostic — you supply the model name and endpoint${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}  └─ AI Cognitive Analytics appear AFTER scan data when active${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}  └─ Dormant by default — standard mode unaffected without a key${RESET}"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}SYSTEM${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}-q, --quiz${RESET}           Interactive port knowledge quiz"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}--install${RESET}            Install to /usr/local/bin  ${DIM}(requires sudo)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}--uninstall${RESET}          Remove from system         ${DIM}(requires sudo)${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}--version${RESET}            Show version"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}--help${RESET}               Show this help"
+  echo -e "  ${CYAN}║${RESET}  ${GREEN}exit / quit${RESET}          Exit NexPort"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${BOLD}${WHITE}EXAMPLES${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}-h 443  │  -s database  │  -c web  │  scan 192.168.1.0/24${RESET}"
+  echo -e "  ${CYAN}║${RESET}  ${GRAY}export html  │  intel set-key <key>  │  intel set-ai-key <key>${RESET}"
+  echo -e "  ${CYAN}║${RESET}"
+  echo -e "  ${BOLD}${CYAN}╚══════════════════════════════════════════════════════════════════════╝${RESET}"
+  echo ""
+}
+
+_dispatch() {
+  local cmd="$1"
+  local args="${2:-}"
+
+  case "$cmd" in
+    "-h"|"--info")
+      [[ -z "$args" ]] && show_help || lookup_port "$args" ;;
+    "--help")
+      show_help ;;
+    "--version")
+      echo -e "\n  ${CYAN}NEXPORT — Intelligent Threat Analysis Suite${RESET}\n" ;;
+    "--install")
+      _nexport_install ;;
+    "--uninstall")
+      _nexport_uninstall ;;
+    "-a"|"--all")
+      show_all ;;
+    "-t"|"--top")
+      show_top_ports ;;
+    "-s"|"--search")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: -s <keyword>${RESET}\n" || search_ports "$args" ;;
+    "-c"|"--category")
+      [[ -z "$args" ]] && list_categories || show_category "$args" ;;
+    "-p"|"--protocol")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: -p <tcp|udp|both>${RESET}\n" || filter_by_protocol "$args" ;;
+    "-e"|"--encryption")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: -e <yes|no|partial>${RESET}\n" || filter_by_encryption "$args" ;;
+    "-r"|"--risk")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: -r <critical|high|medium|low>${RESET}\n" || filter_by_risk "$args" ;;
+    "--cve")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: --cve <CVE-ID>${RESET}\n" || search_cves "$args" ;;
+    "scan")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: scan <target>${RESET}\n" || run_nmap_scan "$args" ;;
+    "paste"|"summarize")
+      summarize_paste_mode ;;
+    "export")
+      [[ -z "$args" ]] && echo -e "\n  ${RED}Usage: export <json|csv|markdown|html>${RESET}\n" || export_db "$args" ;;
+    "intel")
+      intel_dispatch $args ;;
+    "-q"|"--quiz")
+      quiz_mode ;;
+    "exit"|"quit"|"q")
+      echo -e "\n  ${CYAN}NexPort signing off. Stay secure.${RESET}\n"
+      exit 0 ;;
+    "")
+      : ;;
+    *)
+      lookup_port "$cmd" ;;
+  esac
+}
+
+_handle_cli_args() {
+  local cmd="$1"
+  shift
+
+  case "$cmd" in
+    "-h"|"--info")       _dispatch "-h" "${1:-}" ;;
+    "-s"|"--search")     _dispatch "-s" "${1:-}" ;;
+    "-c"|"--category")   _dispatch "-c" "${1:-}" ;;
+    "-p"|"--protocol")   _dispatch "-p" "${1:-}" ;;
+    "-e"|"--encryption") _dispatch "-e" "${1:-}" ;;
+    "-r"|"--risk")       _dispatch "-r" "${1:-}" ;;
+    "--cve")             _dispatch "--cve" "${1:-}" ;;
+    "scan")              _dispatch "scan" "${1:-}" ;;
+    "export")            _dispatch "export" "${1:-}" ;;
+    "-a"|"--all")        _dispatch "-a" ;;
+    "-t"|"--top")        _dispatch "-t" ;;
+    "-q"|"--quiz")       _dispatch "-q" ;;
+    "--help")            show_help ;;
+    "--version")         _dispatch "--version" ;;
+    "--install")         _nexport_install ;;
+    "--uninstall")       _nexport_uninstall ;;
+    "paste"|"summarize") _dispatch "paste" ;;
+    "intel")             intel_dispatch "${@}" ;;
+    *)                   lookup_port "$cmd" ;;
+  esac
+}
+
+_prompt_loop() {
+  while true; do
+    echo -ne "  ${GREEN}nexport${RESET}${GRAY}>${RESET} "
+    read -r input
+    [[ -z "$input" ]] && continue
+
+    local cmd="${input%% *}"
+    local args=""
+    [[ "$input" == *" "* ]] && args="${input#* }"
+
+    _dispatch "$cmd" "$args"
+  done
+}
+
+_auto_install_check() {
+  if [[ ! -f "$NEXPORT_INSTALL_PATH" && $EUID -eq 0 ]]; then
+    echo -e "\n  ${YELLOW}[*]${RESET} First run detected. Installing NexPort system-wide..."
+    _nexport_install
+  fi
+}
+
+if [[ $# -gt 0 ]]; then
+  source "$NEXPORT_DIR/lib/colors.sh" 2>/dev/null
+  _handle_cli_args "$@"
+else
+  _auto_install_check
+  show_banner
+  _prompt_loop
+fi
