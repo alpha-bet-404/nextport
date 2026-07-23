@@ -3,8 +3,8 @@
 > **Professional Network Port Intelligence, Live Threat Intelligence & AI-Driven Security Analytics Platform**
 >
 > ---
-> 🖥️ **GitHub Profile:** [@alpha-bet](https://github.com/alpha-bet-404) <br>
-> 📦 **Official Repository:** [github.com/alpha-bet/nexport.git](https://github.com/alpha-bet-404/nexport.git) <br>
+> 🖥️ **GitHub Profile:** [@alpha-bet-404](https://github.com/alpha-bet-404) <br>
+> 📦 **Official Repository:** [github.com/alpha-bet-404/nexport.git](https://github.com/alpha-bet-404/nexport.git) <br>
 > 🔒 **Copyright:** © 2026 alpha-bet. All rights reserved.
 
 ---
