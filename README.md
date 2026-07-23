@@ -4,7 +4,7 @@
 >
 > ---
 > 🖥️ **GitHub Profile:** [@alpha-bet-404](https://github.com/alpha-bet-404) <br>
-> 📦 **Official Repository:** [github.com/alpha-bet-404/nexport](https://github.com/alpha-bet-404/nexport) <br>
+> 📦 **Official Repository:** [github.com/alpha-bet-404/nexport](https://github.com/alpha-bet-404/nextport.git) <br>
 > 🔒 **Copyright:** © 2026 alpha-bet. All rights reserved.
 
 ---
@@ -595,4 +595,4 @@ brew install jq           # macOS
 ---
 
 *NEXPORT — Intelligent Threat Analysis Suite*
-*Developed by **alpha-bet** — https://github.com/alpha-bet-404/nexport.git*
+*Developed by **alpha-bet** — https://github.com/alpha-bet-404/nextport.git*
