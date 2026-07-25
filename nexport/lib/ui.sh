@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-***REMOVED***
-***REMOVED***
+
 
 show_banner() {
   clear
