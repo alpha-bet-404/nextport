@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-***REMOVED***
-# Lead Developer: Steven Osama | GitHub: @stevenosama025-sudo
+
 
 NEXPORT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NEXPORT_INSTALL_PATH="/usr/local/bin/nexport"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-***REMOVED***
-***REMOVED***
+# Copyright (c) 2026 Steven Osama (zeroman). All rights reserved.
+# Lead Developer: Steven Osama | GitHub: @zeroman-root
 
 search_ports() {
   local keyword="${1,,}"
