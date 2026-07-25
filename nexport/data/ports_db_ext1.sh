@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-***REMOVED***
-***REMOVED***
+
 
 PORT_DATA["3"]="3|COMPRESSNET|TCP/UDP|NO|NETWORK|Compression Process|IANA-assigned management utility for compression process. No modern deployment. Historic protocol used in early ARPANET experimental compression. If seen open, investigate — no legitimate modern use.|LOW|-|-"
 PORT_DATA["5"]="5|RJE|TCP|NO|NETWORK|Remote Job Entry|Early IBM remote batch job submission protocol from mainframe era. Completely obsolete. Presence indicates very old or misconfigured system.|LOW|-|-"
