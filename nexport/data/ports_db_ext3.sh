@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-***REMOVED***
-***REMOVED***
+
 
 PORT_DATA["6000"]="6000|X11|TCP|NO|REMOTE|X Window System|X11 display server protocol. Completely unencrypted graphical sessions. Allows remote window injection and keystroke capture. Use SSH X11 forwarding with ForwardX11Trusted no. Never expose publicly.|HIGH|-|-"
 PORT_DATA["6001"]="6001|X11-DISPLAY1|TCP|NO|REMOTE|X11 Display :1|Second X11 display. Same cleartext exposure as 6000. SSH tunnel required.|HIGH|-|-"
