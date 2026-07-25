@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-***REMOVED***
-***REMOVED***
+
 
 declare -A PORT_DATA=(
 
