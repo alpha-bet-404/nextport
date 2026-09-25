@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2026 Steven Osama (zeroman). All rights reserved.
-# Lead Developer: Steven Osama | GitHub: @zeroman-root
+
 
 summarize_paste_mode() {
   clear
