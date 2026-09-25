@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2026 Steven Osama (zeroman). All rights reserved.
-# Lead Developer: Steven Osama | GitHub: @zeroman-root
+
 
 declare -A QUIZ_STATS_HISTORY
 
