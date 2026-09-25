@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2026 Steven Osama (zeroman). All rights reserved.
-# Lead Developer: Steven Osama | GitHub: @zeroman-root
 
 NEXPORT_CONFIG_DIR="${HOME}/.nexport"
 NEXPORT_CONFIG_FILE="${NEXPORT_CONFIG_DIR}/config"
