@@ -1,18 +1,5 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2026 Steven Osama (zeroman). All rights reserved.
-# Lead Developer: Steven Osama | GitHub: @zeroman-root
-
-# ── AI Intelligence Layer ────────────────────────────────────────────────────
-# Optional module: dormant by default. Activates only when a valid AI API key
-# is present in ~/.nexport/config.
-#
-# Design: Model-agnostic. The module stores and uses whatever provider, model,
-# and endpoint the user specifies — it does not hardcode any model name or URL.
-# It treats the AI as a generic text processor:  key + endpoint + model → response.
-#
-# Scope: This module analyses INPUT DATA ONLY. It does not access or modify
-# the NEXPORT codebase. Branding and attribution are fully preserved.
 
 _ai_intel_load_config() {
   [[ -f "$NEXPORT_CONFIG_FILE" ]] && source "$NEXPORT_CONFIG_FILE"
